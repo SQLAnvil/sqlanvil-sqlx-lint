@@ -3,15 +3,15 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dataform-sqlx-lint"
-version = "0.1.1"
-description = "Convention linter for Dataform .sqlx files — checks the config-block and project conventions that SQL linters cannot see"
+name = "sqlanvil-sqlx-lint"
+version = "0.2.0"
+description = "Convention linter for SQLAnvil .sqlx files — config-block, project-convention, and sqlanvil-delta checks that SQL linters and compile cannot see"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "Ivan Histand", email = "ihistand@rotoplas.com" }]
-keywords = ["dataform", "sqlx", "lint", "bigquery", "pre-commit"]
+authors = [{ name = "Ivan Histand", email = "ivan@histand.net" }]
+keywords = ["sqlanvil", "sqlx", "lint", "postgres", "supabase", "mysql", "bigquery", "dataform", "pre-commit"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -20,10 +20,12 @@ classifiers = [
 ]
 
 [project.scripts]
-dataform-sqlx-lint = "dataform_sqlx_lint.cli:entrypoint"
+sqlanvil-sqlx-lint = "sqlanvil_sqlx_lint.cli:entrypoint"
 
 [project.urls]
-Homepage = "https://github.com/acuantia/dataform-sqlx-lint"
+Homepage = "https://github.com/SQLAnvil/sqlanvil-sqlx-lint"
+Documentation = "https://sqlanvil.com/docs"
+Upstream = "https://github.com/acuantia/dataform-sqlx-lint"
 
 [tool.setuptools.packages.find]
 where = ["src"]

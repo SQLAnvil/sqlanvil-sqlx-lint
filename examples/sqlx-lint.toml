@@ -1,0 +1,37 @@
+# Example .sqlx-lint.toml for a sqlanvil project laid out as
+#   definitions/sources/       declarations (columnTypes from `sqlanvil introspect`)
+#   definitions/intermediate/  views and staging tables
+#   definitions/outputs/       BI-facing tables and materialized views
+# Copy to <your project>/.sqlx-lint.toml and adapt.
+
+# Target warehouse. Omit to read `warehouse:` from workflow_settings.yaml.
+# warehouse = "postgres"
+
+# Environment suffixes that must never be hardcoded in schema: (E003).
+# `--schema-suffix` and environments.<name>.schemaSuffix append them at run time;
+# `sqlanvil migrate-dataform` scaffolds an `environments.test` with suffix "test".
+schema_suffixes = ["_prod", "_dev", "_test"]
+
+# Schemas the SQL body may reference directly without ${ref()} (E006).
+# System catalogs are always allowed; list extension or foreign schemas here.
+allowed_schemas = ["extensions"]
+
+# Opt-in house-style rules:
+#   E005 — operations/assertions must not set schema:
+#   W008 — post_operations {} should follow the main SELECT
+enable = ["E005", "W008"]
+
+# E010 column-doc coverage, scoped to the BI-facing layer while documentation
+# catches up. Remove to enforce coverage everywhere.
+coverage_paths = ["definitions/outputs/"]
+
+# Naming/type policies per directory (E007).
+[[dir_policies]]
+path_contains = "definitions/outputs/"
+require_prefix = "rpt_"
+require_types = ["table", "incremental", "view"]
+
+[[dir_policies]]
+path_contains = "definitions/intermediate/"
+require_prefix = "stg_"
+severity = "warning"

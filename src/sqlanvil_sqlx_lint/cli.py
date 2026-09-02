@@ -1,6 +1,7 @@
 """Command-line interface.
 
-Usage: dataform-sqlx-lint [--config PATH] [--definitions-root DIR] FILE [FILE ...]
+Usage: sqlanvil-sqlx-lint [--config PATH] [--warehouse NAME]
+                          [--definitions-root DIR] FILE [FILE ...]
 Exit codes: 0 = clean or warnings only, 1 = errors found, 2 = usage error.
 """
 
@@ -8,11 +9,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
-import tomllib
-
-from .config import Config, _from_dict, load_config
+from .config import WAREHOUSES, Config, load_config, load_config_file, with_detected_warehouse
 from .linter import lint_file
 
 
@@ -35,14 +35,20 @@ def _repo_resolver(root: Path):
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="dataform-sqlx-lint",
-        description="Convention linter for Dataform .sqlx files",
+        prog="sqlanvil-sqlx-lint",
+        description="Convention linter for SQLAnvil .sqlx files",
     )
     parser.add_argument("files", nargs="+", help=".sqlx files to lint")
     parser.add_argument(
         "--config",
         help="path to a TOML config file (default: .sqlx-lint.toml or "
         "[tool.sqlx-lint] in ./pyproject.toml)",
+    )
+    parser.add_argument(
+        "--warehouse",
+        choices=WAREHOUSES,
+        help="target warehouse (default: `warehouse` in the config, else "
+        "workflow_settings.yaml in the working directory, else postgres)",
     )
     parser.add_argument(
         "--definitions-root",
@@ -52,10 +58,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.config:
-        cfg: Config = _from_dict(tomllib.loads(Path(args.config).read_text()))
-    else:
-        cfg = load_config(".")
+    try:
+        if args.config:
+            cfg: Config = with_detected_warehouse(load_config_file(args.config), ".")
+        else:
+            cfg = load_config(".")
+    except (OSError, ValueError) as exc:
+        print(f"sqlx-lint: bad config: {exc}", file=sys.stderr)
+        return 2
+    if args.warehouse:
+        cfg = replace(cfg, warehouse=args.warehouse)
     resolver = _repo_resolver(Path(args.definitions_root))
 
     errors = warnings = 0

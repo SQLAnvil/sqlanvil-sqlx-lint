@@ -1,7 +1,7 @@
 """Core rule tests, ported from the original in-house checker (40 cases)
 and extended for the configurable community API."""
 
-from dataform_sqlx_lint import Config, DirPolicy, lint_text
+from sqlanvil_sqlx_lint import Config, DirPolicy, lint_text
 
 
 def codes(findings):

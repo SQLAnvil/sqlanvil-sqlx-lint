@@ -1,6 +1,8 @@
 """Config loading from .sqlx-lint.toml / pyproject.toml [tool.sqlx-lint]."""
 
-from dataform_sqlx_lint.config import Config, load_config
+import pytest
+
+from sqlanvil_sqlx_lint.config import Config, load_config
 
 TOML = """\
 schema_suffixes = ["_prod", "_dev", "_staging"]
@@ -51,7 +53,7 @@ def test_standalone_wins_over_pyproject(tmp_path):
 def test_defaults_when_no_config(tmp_path):
     cfg = load_config(tmp_path)
     assert cfg == Config()
-    assert cfg.schema_suffixes == ["_prod", "_dev"]
+    assert cfg.schema_suffixes == ["_prod", "_dev", "_test"]
     assert cfg.dir_policies == []
     assert not cfg.enabled_extra and not cfg.disabled
 
@@ -64,3 +66,42 @@ def test_unknown_key_rejected(tmp_path):
         assert "no_such_option" in str(exc)
     else:
         raise AssertionError("expected ValueError for unknown key")
+
+
+def test_warehouse_key_and_allowed_schemas(tmp_path):
+    (tmp_path / ".sqlx-lint.toml").write_text(
+        'warehouse = "mysql"\nallowed_schemas = ["ext"]\n', encoding="utf-8"
+    )
+    cfg = load_config(tmp_path)
+    assert cfg.warehouse == "mysql" and cfg.allowed_schemas == ["ext"]
+
+
+def test_unknown_warehouse_rejected(tmp_path):
+    (tmp_path / ".sqlx-lint.toml").write_text('warehouse = "snowflake"\n', encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_config(tmp_path)
+
+
+def test_warehouse_detected_from_workflow_settings(tmp_path):
+    (tmp_path / "workflow_settings.yaml").write_text(
+        "warehouse: supabase\ndefaultDataset: x\n", encoding="utf-8"
+    )
+    assert load_config(tmp_path).warehouse == "supabase"
+
+
+def test_warehouse_mapping_form_detected(tmp_path):
+    (tmp_path / "workflow_settings.yaml").write_text(
+        "warehouse:\n  kind: bigquery\n  projectId: p\n", encoding="utf-8"
+    )
+    assert load_config(tmp_path).warehouse == "bigquery"
+
+
+def test_explicit_warehouse_beats_workflow_settings(tmp_path):
+    (tmp_path / "workflow_settings.yaml").write_text("warehouse: mysql\n", encoding="utf-8")
+    (tmp_path / ".sqlx-lint.toml").write_text('warehouse = "postgres"\n', encoding="utf-8")
+    assert load_config(tmp_path).warehouse == "postgres"
+
+
+def test_default_warehouse_is_postgres(tmp_path):
+    cfg = load_config(tmp_path)
+    assert cfg.warehouse is None and cfg.effective_warehouse == "postgres"
