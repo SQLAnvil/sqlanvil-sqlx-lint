@@ -13,4 +13,4 @@ __all__ = [
     "load_config",
     "load_config_file",
 ]
-__version__ = "0.2.0"
+__version__ = "0.2.1"

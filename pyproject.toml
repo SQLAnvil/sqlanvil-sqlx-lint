@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlanvil-sqlx-lint"
-version = "0.2.0"
+version = "0.2.1"
 description = "Convention linter for SQLAnvil .sqlx files — config-block, project-convention, and sqlanvil-delta checks that SQL linters and compile cannot see"
 readme = "README.md"
 requires-python = ">=3.11"
