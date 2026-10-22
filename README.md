@@ -148,13 +148,70 @@ Suppress with a reason, sparingly — the convention is usually the fix.
 The `sqlanvil-sqlx-lint` Agent Skill teaches AI coding agents (Claude Code,
 Codex CLI, Cursor, or any tool supporting the open
 [Agent Skills](https://agentskills.io/) format) to run this linter on every
-`.sqlx` file they create or modify. It lives with the other SQLAnvil skills:
+`.sqlx` file they create or modify. It lives with the other SQLAnvil skills
+in [SQLAnvil/agent-skills](https://github.com/SQLAnvil/agent-skills).
+
+The skill runs the `sqlanvil-sqlx-lint` command, so install the linter too:
+`pip install sqlanvil-sqlx-lint`, into the virtualenv your sqlanvil project
+uses.
+
+### Claude Code
+
+Run one of these from your sqlanvil project. They use the
+[skills CLI](https://skills.sh), which needs Node.js.
+
+**For this project, shared with your team:**
 
 ```bash
-npx skills add SQLAnvil/agent-skills
+npx skills add SQLAnvil/agent-skills --skill sqlanvil-sqlx-lint -a claude-code
 ```
 
-Source: https://github.com/SQLAnvil/agent-skills
+This writes `.claude/skills/sqlanvil-sqlx-lint/SKILL.md`, plus a
+`skills-lock.json` that records where the skill came from. Commit both.
+Everyone who clones the repo gets the skill, and so do Claude Code sessions
+on the web, which can't see the skills in your home directory.
+
+**For you, in every project:**
+
+```bash
+npx skills add SQLAnvil/agent-skills --skill sqlanvil-sqlx-lint -a claude-code -g
+```
+
+This writes `~/.claude/skills/sqlanvil-sqlx-lint/SKILL.md`.
+
+Use `--skill '*'` instead to also install `sqlanvil-engineering-fundamentals`,
+which teaches the agent how sqlanvil projects differ from Dataform.
+The two skills work together.
+
+**Without Node.js**, copy the skill folder yourself:
+
+```bash
+git clone --depth 1 https://github.com/SQLAnvil/agent-skills /tmp/sas
+mkdir -p .claude/skills    # or ~/.claude/skills for every project
+cp -r /tmp/sas/skills/sqlanvil-sqlx-lint .claude/skills/
+```
+
+**Check that it loaded.** Claude Code picks up new skills without a restart.
+One exception: if `.claude/skills/` didn't exist when your session started,
+run `/reload-skills` once. Then:
+
+1. Run `/skills`. `sqlanvil-sqlx-lint` should be in the list.
+2. Ask *"lint definitions/my_table.sqlx for sqlanvil conventions"*. Claude
+   should run `sqlanvil-sqlx-lint` and report findings by rule code. From
+   then on it lints every `.sqlx` file it creates or edits, without being
+   asked.
+
+You can also run the skill yourself by typing `/sqlanvil-sqlx-lint`.
+
+**Updating.** The skill is updated with every SQLAnvil release.
+`npx skills update sqlanvil-sqlx-lint` pulls the latest version of an install
+made with the skills CLI. For a copied folder, copy it again.
+
+### Other agents
+
+`npx skills add SQLAnvil/agent-skills` without `-a` installs into every agent
+it detects on your machine (Codex CLI, Cursor, and others). To copy by hand,
+put `skills/sqlanvil-sqlx-lint/` in your agent's skills directory.
 
 ## Development
 
