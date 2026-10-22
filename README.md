@@ -183,7 +183,30 @@ Use `--skill '*'` instead to also install `sqlanvil-engineering-fundamentals`,
 which teaches the agent how sqlanvil projects differ from Dataform.
 The two skills work together.
 
-**Without Node.js**, copy the skill folder yourself:
+**As a Claude Code plugin.** The `sqlanvil-toolkit` plugin bundles both
+skills, plus `/sqlanvil-compile`, `/sqlanvil-test`, `/sqlanvil-run`,
+`/sqlanvil-new-table` and `/sqlanvil-introspect` commands. No Node.js needed:
+
+```bash
+claude plugin marketplace add ihistand/claude-plugins
+claude plugin install sqlanvil-toolkit@ihistand
+```
+
+Or type the same thing inside Claude Code, as `/plugin marketplace add
+ihistand/claude-plugins` and then `/plugin install sqlanvil-toolkit@ihistand`.
+Either way it's installed for you, in every project. To share it with your
+team instead, add `--scope project` to both commands and commit
+`.claude/settings.json`. Teammates get the plugin after they trust the
+folder. Plugins don't load in Claude Code sessions on the web; for those,
+commit the skill with the project install above.
+
+Plugin skills carry the plugin's name: the skill shows in `/skills` as
+`sqlanvil-toolkit:sqlanvil-sqlx-lint`, and you run it yourself with
+`/sqlanvil-toolkit:sqlanvil-sqlx-lint`. To update, run
+`claude plugin marketplace update ihistand` and then
+`claude plugin update sqlanvil-toolkit@ihistand`, and restart Claude Code.
+
+**By hand**, copy the skill folder yourself:
 
 ```bash
 git clone --depth 1 https://github.com/SQLAnvil/agent-skills /tmp/sas
